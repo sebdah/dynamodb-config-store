@@ -16,6 +16,8 @@ prod        | secret-key     |                |                | test1234
 *) Hash key
 **) Range key
 """
+import time
+
 from boto.dynamodb2.fields import HashKey, RangeKey
 from boto.dynamodb2.table import Table
 from boto.dynamodb2.exceptions import ItemNotFound
@@ -62,8 +64,11 @@ class DynamoDBConfigStore(object):
             self.connection.describe_table(self.table_name)
         except JSONResponseError as error:
             if error.error_code == 'ResourceNotFoundException':
-                print('Table does not exist. Creating it.')
-                self._create_table()
+                print('Table {} does not exist. Creating it.'.format(
+                    self.table_name))
+                table_created = self._create_table()
+                if not table_created:
+                    raise TableNotCreatedException
 
         self.table = Table(self.table_name, connection=self.connection)
 
@@ -74,7 +79,7 @@ class DynamoDBConfigStore(object):
         :param read_units: Number of read capacity units to provision
         :type write_units: int
         :param write_units: Number of write capacity units to provision
-        :returns: None
+        :returns: bool -- Returns True if the table was created
         """
         self.table = Table.create(
             self.table_name,
@@ -87,6 +92,9 @@ class DynamoDBConfigStore(object):
                 'write': write_units
             },
             connection=self.connection)
+
+        # Wait for the table to get ACTIVE
+        return self._wait_for_table(target_state='ACTIVE')
 
     def get(self, option):
         """ Get a config item
@@ -127,3 +135,28 @@ class DynamoDBConfigStore(object):
         data[self.option_key] = option
 
         return self.table.put_item(data, overwrite=True)
+
+    def _wait_for_table(self, target_state, sleep_time=5, retries=30):
+        """ Wait for the table to get to a certain state
+
+        :type target_state: str
+        :param target_state: The target state to wait for
+        :type sleep_time: int
+        :param sleep_time: Number of seconds to wait between the checks
+        :type retries: int
+        :param retries: Number of retries before giving up
+        :returns: bool -- True if the target state was reached, else False
+        """
+        while retries > 0:
+            desc = self.connection.describe_table(self.table_name)
+            if desc[u'Table'][u'TableStatus'] == target_state.upper():
+                return True
+
+            time.sleep(sleep_time)
+            retries -= 1
+
+        return False
+
+class TableNotCreatedException(Exception):
+    """ Exception thrown if the table could not be created successfull """
+    pass
