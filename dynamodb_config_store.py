@@ -58,44 +58,6 @@ class DynamoDBConfigStore(object):
 
         self._initialize()
 
-    def _initialize(self):
-        """ Initialize the store """
-        try:
-            self.connection.describe_table(self.table_name)
-        except JSONResponseError as error:
-            if error.error_code == 'ResourceNotFoundException':
-                print('Table {} does not exist. Creating it.'.format(
-                    self.table_name))
-                table_created = self._create_table()
-                if not table_created:
-                    raise TableNotCreatedException
-
-        self.table = Table(self.table_name, connection=self.connection)
-
-    def _create_table(self, read_units=1, write_units=1):
-        """ Create a new table
-
-        :type read_units: int
-        :param read_units: Number of read capacity units to provision
-        :type write_units: int
-        :param write_units: Number of write capacity units to provision
-        :returns: bool -- Returns True if the table was created
-        """
-        self.table = Table.create(
-            self.table_name,
-            schema=[
-                HashKey(self.store_key),
-                RangeKey(self.option_key)
-            ],
-            throughput={
-                'read': read_units,
-                'write': write_units
-            },
-            connection=self.connection)
-
-        # Wait for the table to get ACTIVE
-        return self._wait_for_table(target_state='ACTIVE')
-
     def get(self, option):
         """ Get a config item
 
@@ -135,6 +97,44 @@ class DynamoDBConfigStore(object):
         data[self.option_key] = option
 
         return self.table.put_item(data, overwrite=True)
+
+    def _initialize(self):
+        """ Initialize the store """
+        try:
+            self.connection.describe_table(self.table_name)
+        except JSONResponseError as error:
+            if error.error_code == 'ResourceNotFoundException':
+                print('Table {} does not exist. Creating it.'.format(
+                    self.table_name))
+                table_created = self._create_table()
+                if not table_created:
+                    raise TableNotCreatedException
+
+        self.table = Table(self.table_name, connection=self.connection)
+
+    def _create_table(self, read_units=1, write_units=1):
+        """ Create a new table
+
+        :type read_units: int
+        :param read_units: Number of read capacity units to provision
+        :type write_units: int
+        :param write_units: Number of write capacity units to provision
+        :returns: bool -- Returns True if the table was created
+        """
+        self.table = Table.create(
+            self.table_name,
+            schema=[
+                HashKey(self.store_key),
+                RangeKey(self.option_key)
+            ],
+            throughput={
+                'read': read_units,
+                'write': write_units
+            },
+            connection=self.connection)
+
+        # Wait for the table to get ACTIVE
+        return self._wait_for_table(target_state='ACTIVE')
 
     def _wait_for_table(self, target_state, sleep_time=5, retries=30):
         """ Wait for the table to get to a certain state
