@@ -17,6 +17,8 @@ prod        | secret-key     |                |                | test1234
 **) Range key
 """
 import time
+import os.path
+from ConfigParser import RawConfigParser
 
 from boto.dynamodb2.fields import HashKey, RangeKey
 from boto.dynamodb2.table import Table
@@ -27,6 +29,12 @@ from dynamodb_config_store.exceptions import (
     MisconfiguredSchemaException,
     TableNotCreatedException,
     TableNotReadyException)
+
+# Publish the module __version__
+config_file = RawConfigParser()
+config_file.read(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), 'settings.conf')))
+__version__ = config_file.get('general', 'version')
 
 
 class DynamoDBConfigStore(object):
