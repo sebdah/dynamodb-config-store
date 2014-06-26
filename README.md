@@ -61,9 +61,14 @@ Specific Options can be fetched like this:
 
     store.get('option')
 
-You will get a `dict` with all **Values** related to the given Option. The above is equivivalent to:
+You will get a `dict` with all Values related to the given Option:
 
-    store.get_option('option')
+    {
+        'key1': 'value1',
+        'key2': 'value2',
+        'key3': 'value3',
+        'key4': 'value4'
+    }
 
 #### Get specific Values from an Option
 
