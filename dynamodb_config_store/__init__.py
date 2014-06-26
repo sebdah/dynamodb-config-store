@@ -60,7 +60,7 @@ class DynamoDBConfigStore(object):
 
         self._initialize()
 
-    def get(self, option=None):
+    def get(self, option=None, values=None):
         """ Get a config item
 
         An boto.dynamodb2.exceptions.ItemNotFound will be thrown if the config
@@ -68,10 +68,12 @@ class DynamoDBConfigStore(object):
 
         :type option: str
         :param option: Name of the configuration option, all options if None
+        :type values: list
+        :param values: List of values to return (used to get subsets of values)
         :returns: dict -- Dictionary with all data; {'key': 'value'}
         """
         if option:
-            return self.get_option(option)
+            return self.get_option(option, values=values)
 
         else:
             try:
@@ -92,13 +94,16 @@ class DynamoDBConfigStore(object):
             except ItemNotFound:
                 raise
 
-    def get_option(self, option):
+    def get_option(self, option, values=None):
         """ Get a specific option from the store.
 
         get_option('a') == get(option='a')
+        get_option('a', values=['b', 'c']) == get(option='a', values=['b', 'c'])
 
         :type option: str
         :param option: Name of the configuration option
+        :type values: list
+        :param values: List of values to return (used to get subsets of values)
         :returns: dict -- Dictionary with all data; {'key': 'value'}
         """
         try:
@@ -112,7 +117,14 @@ class DynamoDBConfigStore(object):
             del item[self.store_key]
             del item[self.option_key]
 
-            return {key: value for key, value in item.items()}
+            if values:
+                return {
+                    key: value
+                    for key, value in item.items()
+                    if key in values
+                }
+            else:
+                return {key: value for key, value in item.items()}
 
         except ItemNotFound:
             raise

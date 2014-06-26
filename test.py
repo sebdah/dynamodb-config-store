@@ -113,6 +113,50 @@ class TestGetOption(unittest.TestCase):
         self.table.delete()
 
 
+class TestGetOptionAndValuesSubset(unittest.TestCase):
+
+    def setUp(self):
+
+        # Configuration options
+        self.table_name = 'conf'
+        self.store_name = 'test'
+
+        # Instanciate the store
+        self.store = DynamoDBConfigStore(
+            connection,
+            self.table_name,
+            self.store_name)
+
+        # Get an Table instance for validation
+        self.table = Table(self.table_name, connection=connection)
+
+    def test_get(self):
+        """ Test that we can retrieve an object from the store """
+        obj = {
+            'endpoint': 'http://test.com',
+            'port': 80,
+            'username': 'test',
+            'password': 'something'
+        }
+
+        # Insert the object
+        self.store.set('api', obj)
+
+        # Retrieve the object
+        option = self.store.get('api', values=['endpoint', 'port'])
+
+        self.assertNotIn('_store', option)
+        self.assertNotIn('_option', option)
+        self.assertNotIn('username', option)
+        self.assertNotIn('password', option)
+        self.assertEqual(option['endpoint'], obj['endpoint'])
+        self.assertEqual(option['port'], obj['port'])
+
+    def tearDown(self):
+        """ Tear down the test case """
+        self.table.delete()
+
+
 class TestGetFullStore(unittest.TestCase):
 
     def setUp(self):
@@ -279,6 +323,7 @@ def suite():
     suite_builder = unittest.TestSuite()
     suite_builder.addTest(unittest.makeSuite(TestSet))
     suite_builder.addTest(unittest.makeSuite(TestGetOption))
+    suite_builder.addTest(unittest.makeSuite(TestGetOptionAndValuesSubset))
     suite_builder.addTest(unittest.makeSuite(TestGetFullStore))
     suite_builder.addTest(unittest.makeSuite(TestCustomStoreAndOptionKeys))
 
