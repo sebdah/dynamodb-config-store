@@ -12,7 +12,7 @@ Using this class you'll be able to easily manage application configuration direc
     prod        | secret-key     |                |                | abcd1234
     test        | db             | localhost      | 27017          |
     test        | external-port  |                | 4000           |
-    prod        | secret-key     |                |                | test1234
+    test        | secret-key     |                |                | test1234
     ------------+----------------+----------------+----------------+----------------
 
 You can then retrieve configuration like this:
