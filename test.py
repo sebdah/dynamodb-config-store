@@ -7,6 +7,7 @@ from boto.dynamodb2.exceptions import ItemNotFound
 from boto.dynamodb2.table import Table
 
 from dynamodb_config_store import DynamoDBConfigStore
+from dynamodb_config_store.exceptions import MisconfiguredSchemaException
 
 connection = DynamoDBConnection(
     aws_access_key_id='foo',
@@ -214,6 +215,43 @@ class TestGetFullStore(unittest.TestCase):
         self.table.delete()
 
 
+class TestMisconfiguredSchemaException(unittest.TestCase):
+
+    def setUp(self):
+
+        # Configuration options
+        self.table_name = 'conf'
+        self.store_name = 'test'
+
+        # Instanciate the store
+        DynamoDBConfigStore(connection, self.table_name, self.store_name)
+
+        # Get an Table instance for validation
+        self.table = Table(self.table_name, connection=connection)
+
+    def test_misconfigured_schema_store_key(self):
+        """ Test that an exception is raised if the store key is not an hash """
+        with self.assertRaises(MisconfiguredSchemaException):
+            DynamoDBConfigStore(
+                connection,
+                self.table_name,
+                self.store_name,
+                store_key='test')
+
+    def test_misconfigured_schema_option_key(self):
+        """ Test that an exception is raised if the option key isn't a range """
+        with self.assertRaises(MisconfiguredSchemaException):
+            DynamoDBConfigStore(
+                connection,
+                self.table_name,
+                self.store_name,
+                option_key='test')
+
+    def tearDown(self):
+        """ Tear down the test case """
+        self.table.delete()
+
+
 class TestSet(unittest.TestCase):
 
     def setUp(self):
@@ -321,6 +359,7 @@ class TestSet(unittest.TestCase):
 def suite():
     """ Defines the test suite """
     suite_builder = unittest.TestSuite()
+    suite_builder.addTest(unittest.makeSuite(TestMisconfiguredSchemaException))
     suite_builder.addTest(unittest.makeSuite(TestSet))
     suite_builder.addTest(unittest.makeSuite(TestGetOption))
     suite_builder.addTest(unittest.makeSuite(TestGetOptionAndValuesSubset))

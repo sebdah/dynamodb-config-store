@@ -23,7 +23,10 @@ from boto.dynamodb2.table import Table
 from boto.dynamodb2.exceptions import ItemNotFound
 from boto.exception import JSONResponseError
 
-from dynamodb_config_store.exceptions import TableNotCreatedException
+from dynamodb_config_store.exceptions import (
+    MisconfiguredSchemaException,
+    TableNotCreatedException,
+    TableNotReadyException)
 
 
 class DynamoDBConfigStore(object):
@@ -146,7 +149,29 @@ class DynamoDBConfigStore(object):
     def _initialize(self):
         """ Initialize the store """
         try:
-            self.connection.describe_table(self.table_name)
+            table = self.connection.describe_table(self.table_name)
+            status = table[u'Table'][u'TableStatus']
+            schema = table[u'Table'][u'KeySchema']
+
+            # Validate that the table is in ACTIVE state
+            if status not in ['ACTIVE', 'UPDATING']:
+                raise TableNotReadyException
+
+            # Validate schema
+            hash_found = False
+            range_found = False
+            for key in schema:
+                if key[u'AttributeName'] == self.store_key:
+                    if key[u'KeyType'] == u'HASH':
+                        hash_found = True
+
+                if key[u'AttributeName'] == self.option_key:
+                    if key[u'KeyType'] == u'RANGE':
+                        range_found = True
+
+            if not hash_found or not range_found:
+                raise MisconfiguredSchemaException
+
         except JSONResponseError as error:
             if error.error_code == 'ResourceNotFoundException':
                 table_created = self._create_table()
