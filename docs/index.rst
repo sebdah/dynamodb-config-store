@@ -9,6 +9,7 @@
     api
     release_notes
     bug_reporting
+    contributing
     license
 
 DynamoDB Config Store documentation
