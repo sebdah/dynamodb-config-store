@@ -31,6 +31,7 @@ from dynamodb_config_store.exceptions import (
 
 class DynamoDBConfigStore(object):
     """ DynamoDB Config Store instance """
+
     connection = None   # boto.dynamodb2.layer1.DynamoDBConnection instance
     table_name = None   # Name of the DynamoDB table
     store_name = None   # Name of the Store
