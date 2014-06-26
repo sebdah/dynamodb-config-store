@@ -87,7 +87,7 @@ class DynamoDBConfigStore(object):
 
         self._initialize()
 
-    def get(self, option=None, values=None):
+    def get(self, option=None, keys=None):
         """ Get a config item
 
         An boto.dynamodb2.exceptions.ItemNotFound will be thrown if the config
@@ -95,12 +95,12 @@ class DynamoDBConfigStore(object):
 
         :type option: str
         :param option: Name of the configuration option, all options if None
-        :type values: list
-        :param values: List of values to return (used to get subsets of values)
+        :type keys: list
+        :param keys: List of keys to return (used to get subsets of keys)
         :returns: dict -- Dictionary with all data; {'key': 'value'}
         """
         if option:
-            return self.get_option(option, values=values)
+            return self.get_option(option, keys=keys)
 
         else:
             try:
@@ -121,16 +121,16 @@ class DynamoDBConfigStore(object):
             except ItemNotFound:
                 raise
 
-    def get_option(self, option, values=None):
+    def get_option(self, option, keys=None):
         """ Get a specific option from the store.
 
         get_option('a') == get(option='a')
-        get_option('a', values=['b', 'c']) == get(option='a', values=['b', 'c'])
+        get_option('a', keys=['b', 'c']) == get(option='a', keys=['b', 'c'])
 
         :type option: str
         :param option: Name of the configuration option
-        :type values: list
-        :param values: List of values to return (used to get subsets of values)
+        :type keys: list
+        :param keys: List of keys to return (used to get subsets of keys)
         :returns: dict -- Dictionary with all data; {'key': 'value'}
         """
         try:
@@ -144,11 +144,11 @@ class DynamoDBConfigStore(object):
             del item[self.store_key]
             del item[self.option_key]
 
-            if values:
+            if keys:
                 return {
                     key: value
                     for key, value in item.items()
-                    if key in values
+                    if key in keys
                 }
             else:
                 return {key: value for key, value in item.items()}

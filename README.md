@@ -25,7 +25,7 @@ You can then retrieve configuration like this:
     # Get the 'db' option and all it's values
     store.get('db') # Returns {'host': 'db-cluster.com', 'port', Decimal(27017)}
 
-In our lingo a **Store** is roughly equivivalent to a configuration file. And an **Option** is an key in the Store which holds zero or more **Values**.
+In our lingo a **Store** is roughly equivivalent to a configuration file. And an **Option** is an key in the Store which holds zero or more **Keys**.
 
 ## Usage
 
@@ -61,7 +61,7 @@ Specific Options can be fetched like this:
 
     store.get('option')
 
-You will get a `dict` with all Values related to the given Option:
+You will get a `dict` with all Keys related to the given Option:
 
     {
         'key1': 'value1',
@@ -70,11 +70,11 @@ You will get a `dict` with all Values related to the given Option:
         'key4': 'value4'
     }
 
-#### Get specific Values from an Option
+#### Get specific Keys from an Option
 
-If you don't need all Values in the response, you can select which Values you want to retrieve by adding the `values` parameter:
+If you don't need all Keys in the response, you can select which Keys you want to retrieve by adding the `keys` parameter:
 
-    store.get('option', values=['value1', 'value4'])
+    store.get('option', keys=['key1', 'key4'])
 
 Returns:
 

@@ -114,7 +114,7 @@ class TestGetOption(unittest.TestCase):
         self.table.delete()
 
 
-class TestGetOptionAndValuesSubset(unittest.TestCase):
+class TestGetOptionAndKeysSubset(unittest.TestCase):
 
     def setUp(self):
 
@@ -144,7 +144,7 @@ class TestGetOptionAndValuesSubset(unittest.TestCase):
         self.store.set('api', obj)
 
         # Retrieve the object
-        option = self.store.get('api', values=['endpoint', 'port'])
+        option = self.store.get('api', keys=['endpoint', 'port'])
 
         self.assertNotIn('_store', option)
         self.assertNotIn('_option', option)
@@ -320,8 +320,8 @@ class TestSet(unittest.TestCase):
         self.assertEqual(option['username'], updatedObj['username'])
         self.assertEqual(option['password'], updatedObj['password'])
 
-    def test_update_with_new_value_fields(self):
-        """ Test that we can completely change the value fields """
+    def test_update_with_new_keys(self):
+        """ Test that we can completely change the keys """
         obj = {
             'username': 'luke',
             'password': 'skywalker'
@@ -362,7 +362,7 @@ def suite():
     suite_builder.addTest(unittest.makeSuite(TestMisconfiguredSchemaException))
     suite_builder.addTest(unittest.makeSuite(TestSet))
     suite_builder.addTest(unittest.makeSuite(TestGetOption))
-    suite_builder.addTest(unittest.makeSuite(TestGetOptionAndValuesSubset))
+    suite_builder.addTest(unittest.makeSuite(TestGetOptionAndKeysSubset))
     suite_builder.addTest(unittest.makeSuite(TestGetFullStore))
     suite_builder.addTest(unittest.makeSuite(TestCustomStoreAndOptionKeys))
 
