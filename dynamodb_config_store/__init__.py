@@ -28,12 +28,12 @@ from dynamodb_config_store.exceptions import TableNotCreatedException
 
 class DynamoDBConfigStore(object):
     """ DynamoDB Config Store instance """
-    connection = None
-    table_name = None
-    store_name = None
-    store_key = None
-    option_key = None
-    table = None
+    connection = None   # boto.dynamodb2.layer1.DynamoDBConnection instance
+    table_name = None   # Name of the DynamoDB table
+    store_name = None   # Name of the Store
+    store_key = None    # Key for the store (default: _store)
+    option_key = None   # Key for the option (default: _option)
+    table = None        # boto.dynamodb2.table.Table instance
 
     def __init__(
             self, connection, table_name, store_name,
@@ -106,8 +106,6 @@ class DynamoDBConfigStore(object):
             self.connection.describe_table(self.table_name)
         except JSONResponseError as error:
             if error.error_code == 'ResourceNotFoundException':
-                print('Table {} does not exist. Creating it.'.format(
-                    self.table_name))
                 table_created = self._create_table()
                 if not table_created:
                     raise TableNotCreatedException
