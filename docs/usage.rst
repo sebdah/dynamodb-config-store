@@ -69,7 +69,7 @@ Returns:
 Fetching all Options in a Store
 """""""""""""""""""""""""""""""
 
-If you want to retrieve all Options within a Stor, simply omit the ``option`` in the request:
+If you want to retrieve all Options within a Store, simply omit the ``option`` in the request:
 ::
 
     store.get()
@@ -87,3 +87,17 @@ You will get an dictionary like this in return:
             'key4': 'value2'
         }
     }
+
+Table management
+----------------
+
+DynamoDB Config Store will automatically create a new DynamoDB table if the configured table does not exist. The new table will be provisioned with 1 read unit and 1 write unit. If you want another provisioning, please supply the ``read_units`` and ``write_units`` parameters when instanciating ``DynamoDBConfigStore``, e.g:
+::
+
+    store = DynamoDBConfigStore(
+        'table_name',
+        'store_name',
+        read_units=10,
+        write_units=5)
+
+If the table already exists when ``DynamoDBConfigStore`` is instanciated, then the table will be left intact. DynamoDB Config Store will check that the table schema is compatible with the configuration. That is; it will check that the hash key is ``store_key`` and the ``option_key`` is the range key. An ``MisconfiguredSchemaException`` will be raised if the table schema is not correct.
