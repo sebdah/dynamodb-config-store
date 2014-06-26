@@ -23,6 +23,8 @@ from boto.dynamodb2.table import Table
 from boto.dynamodb2.exceptions import ItemNotFound
 from boto.exception import JSONResponseError
 
+from dynamodb_config_store.exceptions import TableNotCreatedException
+
 
 class DynamoDBConfigStore(object):
     """ DynamoDB Config Store instance """
@@ -156,7 +158,3 @@ class DynamoDBConfigStore(object):
             retries -= 1
 
         return False
-
-class TableNotCreatedException(Exception):
-    """ Exception thrown if the table could not be created successfull """
-    pass
