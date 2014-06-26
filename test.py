@@ -16,7 +16,7 @@ connection = DynamoDBConnection(
     is_secure=False)
 
 
-class TestGet(unittest.TestCase):
+class TestGetOption(unittest.TestCase):
 
     def setUp(self):
 
@@ -59,6 +59,63 @@ class TestGet(unittest.TestCase):
         """ Test that we can't retrieve non-existing items """
         with self.assertRaises(ItemNotFound):
             self.store.get('doesnotexist')
+
+    def tearDown(self):
+        """ Tear down the test case """
+        self.table.delete()
+
+
+class TestGetFullStore(unittest.TestCase):
+
+    def setUp(self):
+
+        # Configuration options
+        self.table_name = 'conf'
+        self.store_name = 'test'
+
+        # Instanciate the store
+        self.store = DynamoDBConfigStore(
+            connection,
+            self.table_name,
+            self.store_name)
+
+        # Get an Table instance for validation
+        self.table = Table(self.table_name, connection=connection)
+
+    def test_get_of_full_store(self):
+        """ Test that we can retrieve all objects in the store """
+        objApi = {
+            'endpoint': 'http://test.com',
+            'port': 80,
+            'username': 'test',
+            'password': 'something'
+        }
+        objUser = {
+            'username': 'luke',
+            'password': 'skywalker'
+        }
+
+        # Insert the object
+        self.store.set('api', objApi)
+        self.store.set('user', objUser)
+
+        # Retrieve all objects
+        options = self.store.get()
+        self.assertEquals(len(options), 2)
+        optApi = options['api']
+        optUser = options['user']
+
+        self.assertNotIn('_store', optApi)
+        self.assertNotIn('_option', optApi)
+        self.assertEqual(optApi['endpoint'], objApi['endpoint'])
+        self.assertEqual(optApi['port'], objApi['port'])
+        self.assertEqual(optApi['username'], objApi['username'])
+        self.assertEqual(optApi['password'], objApi['password'])
+
+        self.assertNotIn('_store', optUser)
+        self.assertNotIn('_option', optUser)
+        self.assertEqual(optUser['username'], objUser['username'])
+        self.assertEqual(optUser['password'], objUser['password'])
 
     def tearDown(self):
         """ Tear down the test case """
@@ -173,7 +230,8 @@ def suite():
     """ Defines the test suite """
     suite_builder = unittest.TestSuite()
     suite_builder.addTest(unittest.makeSuite(TestSet))
-    suite_builder.addTest(unittest.makeSuite(TestGet))
+    suite_builder.addTest(unittest.makeSuite(TestGetOption))
+    suite_builder.addTest(unittest.makeSuite(TestGetFullStore))
 
     return suite_builder
 

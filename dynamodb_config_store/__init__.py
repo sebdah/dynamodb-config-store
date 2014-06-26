@@ -60,11 +60,42 @@ class DynamoDBConfigStore(object):
 
         self._initialize()
 
-    def get(self, option):
+    def get(self, option=None):
         """ Get a config item
 
         An boto.dynamodb2.exceptions.ItemNotFound will be thrown if the config
         option does not exist.
+
+        :type option: str
+        :param option: Name of the configuration option, all options if None
+        :returns: dict -- Dictionary with all data; {'key': 'value'}
+        """
+        if option:
+            return self.get_option(option)
+
+        else:
+            try:
+                items = {}
+                query = {'{}__eq'.format(self.store_key): self.store_name}
+
+                for item in self.table.query_2(**query):
+                    option = item[self.option_key]
+
+                    # Remove metadata
+                    del item[self.store_key]
+                    del item[self.option_key]
+
+                    items[option] = {k: v for k, v in item.items()}
+
+                return items
+
+            except ItemNotFound:
+                raise
+
+    def get_option(self, option):
+        """ Get a specific option from the store.
+
+        get_option('a') == get(option='a')
 
         :type option: str
         :param option: Name of the configuration option
