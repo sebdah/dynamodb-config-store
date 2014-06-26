@@ -27,6 +27,10 @@ You can then retrieve configuration like this:
 
 In our lingo a **Store** is roughly equivivalent to a configuration file. And an **Option** is an key in the Store which holds zero or more **Keys**.
 
+## Documentation
+
+An overview of the functionality is provided below, for more detailed documentation please head over to [http://dynamodb-config-store.readthedocs.org/](http://dynamodb-config-store.readthedocs.org/).
+
 ## Usage
 
 ### Instanciate a Store
