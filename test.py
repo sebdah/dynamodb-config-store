@@ -17,6 +17,7 @@ connection = DynamoDBConnection(
     is_secure=False)
 print('Connected to DynamoDB Local')
 
+
 class TestGet(unittest.TestCase):
 
     def setUp(self):
@@ -168,6 +169,7 @@ class TestSet(unittest.TestCase):
     def tearDown(self):
         """ Tear down the test case """
         self.table.delete()
+
 
 def suite():
     """ Defines the test suite """
