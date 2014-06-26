@@ -8,14 +8,12 @@ from boto.dynamodb2.table import Table
 
 from dynamodb_config_store import DynamoDBConfigStore
 
-print('Connecting to DynamoDB Local (localhost:8000)')
 connection = DynamoDBConnection(
     aws_access_key_id='foo',
     aws_secret_access_key='bar',
     host='localhost',
     port=8000,
     is_secure=False)
-print('Connected to DynamoDB Local')
 
 
 class TestGet(unittest.TestCase):
