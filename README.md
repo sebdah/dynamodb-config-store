@@ -27,7 +27,7 @@ You can then retrieve configuration like this:
 
 In our lingo a **Store** is roughly equivivalent to a configuration file. And an **Option** is an key in the Store which holds zero or more **Values**.
 
-## Documentation
+## Usage
 
 ### Instanciate a Store
 
@@ -59,9 +59,43 @@ You can insert new items in the configuration via the `set` method.
 
 Specific Options can be fetched like this:
 
-    store.read('option')
+    store.get('option')
 
-You will get a `dict` with all **Values** related to the given Option.
+You will get a `dict` with all **Values** related to the given Option. The above is equivivalent to:
+
+    store.get_option('option')
+
+#### Get specific Values from an Option
+
+If you don't need all Values in the response, you can select which Values you want to retrieve by adding the `values` parameter:
+
+    store.get('option', values=['value1', 'value4'])
+
+Returns:
+
+    {
+        'key1': 'value1',
+        'key4': 'value4'
+    }
+
+#### Fetching all Options in a Store
+
+If you want to retrieve all Options within a Stor, simply omit the `option` in the request:
+
+    store.get()
+
+You will get an dictionary like this in return:
+
+    {
+        'option1': {
+            'key1': 'value1',
+            'key2': 'value2'
+        },
+        'option2': {
+            'key1': 'value1',
+            'key4': 'value2'
+        }
+    }
 
 ## Running tests
 
