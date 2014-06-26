@@ -16,6 +16,54 @@ connection = DynamoDBConnection(
     is_secure=False)
 
 
+class TestCustomStoreAndOptionKeys(unittest.TestCase):
+
+    def setUp(self):
+
+        # Configuration options
+        self.table_name = 'conf'
+        self.store_name = 'test'
+        self.store_key = '_s'
+        self.option_key = '_o'
+
+        # Instanciate the store
+        self.store = DynamoDBConfigStore(
+            connection,
+            self.table_name,
+            self.store_name,
+            store_key=self.store_key,
+            option_key=self.option_key)
+
+        # Get an Table instance for validation
+        self.table = Table(self.table_name, connection=connection)
+
+    def test_custom_store_and_option_keys(self):
+        """ Test that we can set custom store and option keys """
+        obj = {
+            'host': '127.0.0.1',
+            'port': 27017
+        }
+
+        # Insert the object
+        self.store.set('db', obj)
+
+        # Fetch the object directly from DynamoDB
+        kwargs = {
+            '_s': self.store_name,
+            '_o': 'db'
+        }
+        item = self.table.get_item(**kwargs)
+
+        self.assertEqual(item['_s'], self.store_name)
+        self.assertEqual(item['_o'], 'db')
+        self.assertEqual(item['host'], '127.0.0.1')
+        self.assertEqual(item['port'], 27017)
+
+    def tearDown(self):
+        """ Tear down the test case """
+        self.table.delete()
+
+
 class TestGetOption(unittest.TestCase):
 
     def setUp(self):
@@ -232,6 +280,7 @@ def suite():
     suite_builder.addTest(unittest.makeSuite(TestSet))
     suite_builder.addTest(unittest.makeSuite(TestGetOption))
     suite_builder.addTest(unittest.makeSuite(TestGetFullStore))
+    suite_builder.addTest(unittest.makeSuite(TestCustomStoreAndOptionKeys))
 
     return suite_builder
 
