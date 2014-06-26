@@ -1,4 +1,4 @@
-# dynamodb-config-store
+# DynamoDB Config Store
 
 Store your configuration in DynamoDB using DynamoDB Config Store.
 
