@@ -17,6 +17,39 @@ connection = DynamoDBConnection(
     is_secure=False)
 
 
+class TestCustomThroughput(unittest.TestCase):
+
+    def setUp(self):
+
+        # Configuration options
+        self.table_name = 'conf'
+        self.store_name = 'test'
+        self.read_units = 10
+        self.write_units = 8
+
+        # Instanciate the store
+        self.store = DynamoDBConfigStore(
+            connection,
+            self.table_name,
+            self.store_name,
+            read_units=self.read_units,
+            write_units=self.write_units)
+
+        # Get an Table instance for validation
+        self.table = Table(self.table_name, connection=connection)
+
+    def test_custom_throughput(self):
+        """ Test that we can set custom thoughput for new tables """
+        throughput = self.table.describe()[u'Table'][u'ProvisionedThroughput']
+
+        self.assertEqual(throughput[u'ReadCapacityUnits'], self.read_units)
+        self.assertEqual(throughput[u'WriteCapacityUnits'], self.write_units)
+
+    def tearDown(self):
+        """ Tear down the test case """
+        self.table.delete()
+
+
 class TestCustomStoreAndOptionKeys(unittest.TestCase):
 
     def setUp(self):
@@ -59,6 +92,35 @@ class TestCustomStoreAndOptionKeys(unittest.TestCase):
         self.assertEqual(item['_o'], 'db')
         self.assertEqual(item['host'], '127.0.0.1')
         self.assertEqual(item['port'], 27017)
+
+    def tearDown(self):
+        """ Tear down the test case """
+        self.table.delete()
+
+
+class TestDefaultThroughput(unittest.TestCase):
+
+    def setUp(self):
+
+        # Configuration options
+        self.table_name = 'conf'
+        self.store_name = 'test'
+
+        # Instanciate the store
+        self.store = DynamoDBConfigStore(
+            connection,
+            self.table_name,
+            self.store_name)
+
+        # Get an Table instance for validation
+        self.table = Table(self.table_name, connection=connection)
+
+    def test_custom_throughput(self):
+        """ Test that we can set custom thoughput for new tables """
+        throughput = self.table.describe()[u'Table'][u'ProvisionedThroughput']
+
+        self.assertEqual(throughput[u'ReadCapacityUnits'], 1)
+        self.assertEqual(throughput[u'WriteCapacityUnits'], 1)
 
     def tearDown(self):
         """ Tear down the test case """
@@ -360,6 +422,8 @@ def suite():
     """ Defines the test suite """
     suite_builder = unittest.TestSuite()
     suite_builder.addTest(unittest.makeSuite(TestMisconfiguredSchemaException))
+    suite_builder.addTest(unittest.makeSuite(TestDefaultThroughput))
+    suite_builder.addTest(unittest.makeSuite(TestCustomThroughput))
     suite_builder.addTest(unittest.makeSuite(TestSet))
     suite_builder.addTest(unittest.makeSuite(TestGetOption))
     suite_builder.addTest(unittest.makeSuite(TestGetOptionAndKeysSubset))

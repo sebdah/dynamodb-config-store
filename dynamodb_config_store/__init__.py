@@ -61,10 +61,13 @@ class DynamoDBConfigStore(object):
     store_key = None    # Key for the store (default: _store)
     option_key = None   # Key for the option (default: _option)
     table = None        # boto.dynamodb2.table.Table instance
+    read_units = None   # Number of read units to provision to new tables
+    write_units = None  # Number of write units to provision to new tables
 
     def __init__(
             self, connection, table_name, store_name,
-            store_key='_store', option_key='_option'):
+            store_key='_store', option_key='_option',
+            read_units=1, write_units=1):
         """ Constructor for the config store
 
         :type connection: boto.dynamodb2.layer1.DynamoDBConnection
@@ -84,6 +87,8 @@ class DynamoDBConfigStore(object):
         self.store_name = store_name
         self.store_key = store_key
         self.option_key = option_key
+        self.read_units = read_units
+        self.write_units = write_units
 
         self._initialize()
 
@@ -198,7 +203,10 @@ class DynamoDBConfigStore(object):
 
         except JSONResponseError as error:
             if error.error_code == 'ResourceNotFoundException':
-                table_created = self._create_table()
+                table_created = self._create_table(
+                    read_units=self.read_units,
+                    write_units=self.write_units)
+
                 if not table_created:
                     raise TableNotCreatedException
 
