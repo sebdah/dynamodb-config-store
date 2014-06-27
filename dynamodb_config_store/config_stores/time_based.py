@@ -7,8 +7,10 @@ import time
 
 from boto.dynamodb2.exceptions import ItemNotFound
 
+from dynamodb_config_store.config_stores import ConfigStore
 
-class TimeBasedConfigStore(object):
+
+class TimeBasedConfigStore(ConfigStore):
     """ Fetches Stores on a periodic interval from DynamoDB
 
     All internal variables and methods are private (with an leading _), as
@@ -75,14 +77,6 @@ class TimeBasedConfigStore(object):
 
             time.sleep(self._update_interval)
 
-    def _delete_instance_attributes(self):
-        """ Delete all the instance attributes
-
-        :returns: None
-        """
-        for attr in self._attributes:
-            delattr(self, attr)
-
     def _fetch_options(self):
         """ Retrieve a dictionary with all options and values from DynamoDB
 
@@ -105,12 +99,3 @@ class TimeBasedConfigStore(object):
 
         except ItemNotFound:
             return {}
-
-    def _set_instance_attributes(self, options):
-        """ Set instance attributes
-
-        :type options: dict
-        :param options: Dict with {'option': {'key': 'value'}}
-        :returns: None
-        """
-        [setattr(self, key, options[key]) for key in options.keys()]
