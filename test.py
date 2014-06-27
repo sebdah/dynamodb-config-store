@@ -437,7 +437,7 @@ class TestTimeBasedConfigStore(unittest.TestCase):
         self.table = Table(self.table_name, connection=connection)
 
     def test_time_based_config_store(self):
-        """ Test that inserting and updating in time based config stores """
+        """ Test inserting and updating in time based config stores """
         obj = {
             'host': '127.0.0.1',
             'port': 27017
@@ -451,8 +451,8 @@ class TestTimeBasedConfigStore(unittest.TestCase):
             # config has been reloaded
             self.store.config.db
 
-        # Wait for the config reload
-        time.sleep(5)
+        # Force config reload
+        self.store.reload_config()
 
         self.assertEqual(self.store.config.db['host'], obj['host'])
         self.assertEqual(self.store.config.db['port'], obj['port'])

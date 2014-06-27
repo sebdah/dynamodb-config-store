@@ -187,6 +187,20 @@ class DynamoDBConfigStore(object):
 
         return self.table.put_item(data, overwrite=True)
 
+    def reload_config(self):
+        """ Reload the config object
+
+        This issues an query towards DynamoDB in order to fetch the latest data
+        from the store.
+        """
+        if self.auto_update:
+            self.config = TimeBasedConfigStore(
+                self.table,
+                self.store_name,
+                self.store_key,
+                self.option_key,
+                update_interval=self.update_interval)
+
     def _initialize(self):
         """ Initialize the store """
         try:
@@ -224,13 +238,7 @@ class DynamoDBConfigStore(object):
 
         self.table = Table(self.table_name, connection=self.connection)
 
-        if self.auto_update:
-            self.config = TimeBasedConfigStore(
-                self.table,
-                self.store_name,
-                self.store_key,
-                self.option_key,
-                update_interval=self.update_interval)
+        self.reload_config()
 
     def _create_table(self, read_units=1, write_units=1):
         """ Create a new table
