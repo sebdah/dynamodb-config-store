@@ -34,16 +34,16 @@ You can insert new items in the configuration via the ``set`` method.
 Reading configuration
 ---------------------
 
-DynamoDB Config Store implements a few different ways to retrieve configuration. Currently we support:
+DynamoDB Config Store supports a few different ways to retrieve configuration. Currently we support:
 
 * Time based config store (``TimeBasedConfigStore``)
-* Direct config store (``DirectConfigStore``)
+* Simple config store (``SimpleConfigStore``)
 
 The **Time based config store** read data from DynamoDB on a schedule. That approach reduces the read unit consumption, but is not "strongly" consistent as all configuration updates are not reflect until the next config reload.
 
-The **Direct config store** will always query DynamoDB for the latest configuration option. This behavior will consume more reads, but in return you'll always get the latest configuration back.
+The **Simple config store** will always query DynamoDB for the latest configuration option. This behavior will consume more reads, but in return you'll always get the latest configuration back.
 
-Reading configuration - DirectConfigStore
+Reading configuration - SimpleConfigStore
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The implementations documented below here will always fetch the configuration options directly from DynamoDB. For each `get()` below an read towards DynamoDB will be executed.
@@ -104,10 +104,10 @@ You will get an dictionary like this in return:
         }
     }
 
-Load the DirectConfigStore
+Load the SimpleConfigStore
 """"""""""""""""""""""""""
 
-The ``DirectConfigStore`` is enabled by default, but you can explicitly load it like this:
+The ``SimpleConfigStore`` is enabled by default, but you can explicitly load it like this:
 ::
 
     from dynamodb_config_store
@@ -116,7 +116,7 @@ The ``DirectConfigStore`` is enabled by default, but you can explicitly load it 
         connection,
         table_name,
         store_name,
-        store_type='DirectConfigStore')
+        store_type='SimpleConfigStore')
 
 Reading configuration - TimeBasedConfigStore
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

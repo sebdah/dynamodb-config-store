@@ -39,7 +39,7 @@ from boto.dynamodb2.fields import HashKey, RangeKey
 from boto.dynamodb2.table import Table
 from boto.exception import JSONResponseError
 
-from dynamodb_config_store.config_stores.direct import DirectConfigStore
+from dynamodb_config_store.config_stores.simple import SimpleConfigStore
 from dynamodb_config_store.config_stores.time_based import TimeBasedConfigStore
 from dynamodb_config_store.exceptions import (
     MisconfiguredSchemaException,
@@ -73,7 +73,7 @@ class DynamoDBConfigStore(object):
             self, connection, table_name, store_name,
             store_key='_store', option_key='_option',
             read_units=1, write_units=1,
-            store_type='DirectConfigStore',
+            store_type='SimpleConfigStore',
             store_type_args=[], store_type_kwargs={}):
         """ Constructor for the config store
 
@@ -119,8 +119,8 @@ class DynamoDBConfigStore(object):
                 self.option_key,
                 *self.store_type_args,
                 **self.store_type_kwargs)
-        elif self.store_type == 'DirectConfigStore':
-            self.config = DirectConfigStore(
+        elif self.store_type == 'SimpleConfigStore':
+            self.config = SimpleConfigStore(
                 self.table,
                 self.store_name,
                 self.store_key,

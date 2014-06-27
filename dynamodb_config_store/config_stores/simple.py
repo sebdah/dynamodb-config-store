@@ -1,11 +1,11 @@
-""" The Direct Config Store """
+""" The Simple Config Store implementation """
 from boto.dynamodb2.exceptions import ItemNotFound
 
 from dynamodb_config_store.config_stores import ConfigStore
 
 
-class DirectConfigStore(ConfigStore):
-    """ Direct Config Store fetching configuration directly from DynamoDB
+class SimpleConfigStore(ConfigStore):
+    """ SimpleConfigStore fetching configuration directly from DynamoDB
 
     This config store will always poll for the latest changes from DynamoDB.
     """
@@ -17,7 +17,7 @@ class DirectConfigStore(ConfigStore):
     _table = None           # boto.dynamodb2.table.Table
 
     def __init__(self, table, store_name, store_key, option_key):
-        """ Constructor for the DirectConfigStore
+        """ Constructor for the SimpleConfigStore
 
         :type table: boto.dynamodb2.table.Table
         :param table: Table instance
