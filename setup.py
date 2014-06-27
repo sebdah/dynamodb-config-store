@@ -19,7 +19,9 @@ setup(
     packages=['dynamodb_config_store'],
     include_package_data=True,
     zip_safe=False,
-    install_requires=[],
+    install_requires=[
+        'boto>=2.29.1'
+    ],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Console',
