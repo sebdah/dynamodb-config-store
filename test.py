@@ -452,7 +452,7 @@ class TestTimeBasedConfigStore(unittest.TestCase):
             self.store.config.db
 
         # Force config reload
-        self.store.reload_config()
+        self.store.reload()
 
         self.assertEqual(self.store.config.db['host'], obj['host'])
         self.assertEqual(self.store.config.db['port'], obj['port'])

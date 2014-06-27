@@ -144,7 +144,7 @@ class DynamoDBConfigStore(object):
 
         self.table = Table(self.table_name, connection=self.connection)
 
-        self.reload_config()
+        self.reload()
 
     def _create_table(self, read_units=1, write_units=1):
         """ Create a new table
@@ -266,7 +266,7 @@ class DynamoDBConfigStore(object):
         except ItemNotFound:
             raise
 
-    def reload_config(self):
+    def reload(self):
         """ Reload the config object
 
         This issues an query towards DynamoDB in order to fetch the latest data
