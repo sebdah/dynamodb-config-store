@@ -18,8 +18,8 @@ When the Store is instanciated it will create the table if it does not exist. Cu
 
 If the Store is instanciated towards an existing table, it will check that the table schema matches the expected Store schema. In other words it will check that ``store_key`` is the table hash key and that ``option_key`` is the table range key.
 
-Write configuration
--------------------
+Writing configuration
+---------------------
 
 You can insert new items in the configuration via the ``set`` method.
 ::
@@ -31,6 +31,43 @@ You can insert new items in the configuration via the ``set`` method.
 
 Reading configuration
 ~~~~~~~~~~~~~~~~~~~~~
+
+The recommended way to read configuration is to let DynamoDB Config Store store all your configuration in an object from which you can fetch the latest configuration. If you have an option called ``db``, you would access that as
+::
+
+    store.config.db
+
+And you would get a ``dict`` in return:
+::
+
+    {'host': '127.0.0.1', 'port': Decimal(8000)}
+
+By default DynamoDB Config Store will re-read all configuration from DynamoDB every 5 minutes (300 seconds). Any changes in the configuration after an update will not be reflected in the configuration object until the next update has been executed.
+
+The benefit with this over the *Reading configuration directly from DynamoDB* approach is that you will consume much less read capacity. The downside, however, is that the configuration is not always up to date.
+
+Read an Option
+""""""""""""""
+
+You can fetch an Option like this:
+::
+
+    store.config.option
+
+Where ``option`` is the name of your Option.
+
+Force config update
+"""""""""""""""""""
+
+You can manually force a configuration update by issuing:
+::
+
+    store.reload()
+
+Reading configuration directly from DynamoDB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The implementations documented below here will always fetch the configuration options directly from DynamoDB. For each `get()` below an read towards DynamoDB will be executed.
 
 Read a specific Option
 """"""""""""""""""""""
