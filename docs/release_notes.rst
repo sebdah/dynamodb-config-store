@@ -1,6 +1,12 @@
 Release notes
 =============
 
+0.2.0 (2014-06-27)
+------------------
+
+* Modular config store design implemented (`#15 <https://github.com/sebdah/dynamodb-config-store/issues/15>`_)
+* Implement TimeBasedConfigStore for automatic config reloading (`#14 <https://github.com/sebdah/dynamodb-config-store/issues/14>`_)
+
 0.1.1 (2014-06-26)
 ------------------
 
