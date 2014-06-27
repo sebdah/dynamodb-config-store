@@ -10,8 +10,20 @@ DynamoDBConfigStore
     :private-members:
     :members:
 
+ConfigStores
+------------
+
+ConfigStore
+~~~~~~~~~~~
+
+This is the ``ConfigStore`` base class that all other config stores inherit from.
+
+.. autoclass:: dynamodb_config_store.config_stores.ConfigStore
+    :private-members:
+    :members:
+
 TimeBasedConfigStore
---------------------
+~~~~~~~~~~~~~~~~~~~~
 
 The `TimeBasedConfigStore` is the Config Store used for fetching configuration from DynamoDB on a preset interval. All configuration options will be exposed using instance attributes such as ``store.config.option``, where ``option`` is the store option.
 
