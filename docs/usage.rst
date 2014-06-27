@@ -43,8 +43,8 @@ The **Time based config store** read data from DynamoDB on a schedule. That appr
 
 The **Simple config store** will always query DynamoDB for the latest configuration option. This behavior will consume more reads, but in return you'll always get the latest configuration back.
 
-Reading configuration - SimpleConfigStore
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+SimpleConfigStore
+~~~~~~~~~~~~~~~~~
 
 The implementations documented below here will always fetch the configuration options directly from DynamoDB. For each `get()` below an read towards DynamoDB will be executed.
 
@@ -118,8 +118,8 @@ The ``SimpleConfigStore`` is enabled by default, but you can explicitly load it 
         store_name,
         store_type='SimpleConfigStore')
 
-Reading configuration - TimeBasedConfigStore
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+TimeBasedConfigStore
+~~~~~~~~~~~~~~~~~~~~
 
 The recommended (but not the default) way to read configuration is to let DynamoDB Config Store store all your configuration in an object from which you can fetch the latest configuration. If you have an option called ``db``, you would access that as
 ::
