@@ -38,6 +38,7 @@ class TimeBasedConfigStore(object):
         :param option_key: Key name for the option in DynamoDB. Default _option
         :type update_interval: int
         :param update_interval: How often, in seconds, to fetch updates
+        :returns: None
         """
         self._option_key = option_key
         self._store_key = store_key
@@ -53,7 +54,10 @@ class TimeBasedConfigStore(object):
             time.sleep(0.5)
 
     def _run(self):
-        """ Run periodic fetcher """
+        """ Run periodic fetcher
+
+        :returns: None
+        """
         while True:
             # Get options from DynamoDB
             options = self._fetch_options()

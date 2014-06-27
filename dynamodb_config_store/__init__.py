@@ -107,6 +107,9 @@ class DynamoDBConfigStore(object):
     def get(self, option=None, keys=None):
         """ Get a config item
 
+        A query towards DynamoDB will always be executed when this
+        method is called.
+
         An boto.dynamodb2.exceptions.ItemNotFound will be thrown if the config
         option does not exist.
 
@@ -140,6 +143,9 @@ class DynamoDBConfigStore(object):
 
     def get_option(self, option, keys=None):
         """ Get a specific option from the store.
+
+        A query towards DynamoDB will always be executed when this
+        method is called.
 
         get_option('a') == get(option='a')
         get_option('a', keys=['b', 'c']) == get(option='a', keys=['b', 'c'])
@@ -176,6 +182,8 @@ class DynamoDBConfigStore(object):
     def set(self, option, data):
         """ Upsert a config item
 
+        A write towards DynamoDB will be executed when this method is called.
+
         :type option: str
         :param option: Name of the configuration option
         :type data: dict
@@ -192,6 +200,8 @@ class DynamoDBConfigStore(object):
 
         This issues an query towards DynamoDB in order to fetch the latest data
         from the store.
+
+        :returns: None
         """
         if self.auto_update:
             self.config = TimeBasedConfigStore(
@@ -202,7 +212,10 @@ class DynamoDBConfigStore(object):
                 update_interval=self.update_interval)
 
     def _initialize(self):
-        """ Initialize the store """
+        """ Initialize the store
+
+        :returns: None
+        """
         try:
             table = self.connection.describe_table(self.table_name)
             status = table[u'Table'][u'TableStatus']
