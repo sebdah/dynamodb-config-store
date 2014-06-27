@@ -1,5 +1,5 @@
 """ Unit tests for DynamoDB Config Store """
-
+import time
 import unittest
 
 from boto.dynamodb2.layer1 import DynamoDBConnection
@@ -418,6 +418,63 @@ class TestSet(unittest.TestCase):
         self.table.delete()
 
 
+class TestTimeBasedConfigStore(unittest.TestCase):
+
+    def setUp(self):
+
+        # Configuration options
+        self.table_name = 'conf'
+        self.store_name = 'test'
+
+        # Instanciate the store
+        self.store = DynamoDBConfigStore(
+            connection,
+            self.table_name,
+            self.store_name,
+            update_interval=5)
+
+        # Get an Table instance for validation
+        self.table = Table(self.table_name, connection=connection)
+
+    def test_time_based_config_store(self):
+        """ Test that inserting and updating in time based config stores """
+        obj = {
+            'host': '127.0.0.1',
+            'port': 27017
+        }
+
+        # Insert the object
+        self.store.set('db', obj)
+
+        with self.assertRaises(AttributeError):
+            # We do not expect the attribute to exist until the
+            # config has been reloaded
+            self.store.config.db
+
+        # Wait for the config reload
+        time.sleep(5)
+
+        self.assertEqual(self.store.config.db['host'], obj['host'])
+        self.assertEqual(self.store.config.db['port'], obj['port'])
+
+        # Update the object
+        updatedObj = {
+            'host': '127.0.0.1',
+            'port': 8000
+        }
+        self.store.set('db', updatedObj)
+
+        self.assertEqual(self.store.config.db['host'], obj['host'])
+        self.assertEqual(self.store.config.db['port'], obj['port'])
+        time.sleep(5)
+        self.assertEqual(self.store.config.db['host'], updatedObj['host'])
+        self.assertEqual(self.store.config.db['port'], updatedObj['port'])
+
+    def tearDown(self):
+        """ Tear down the test case """
+        self.table.delete()
+
+
 def suite():
     """ Defines the test suite """
     suite_builder = unittest.TestSuite()
@@ -429,6 +486,7 @@ def suite():
     suite_builder.addTest(unittest.makeSuite(TestGetOptionAndKeysSubset))
     suite_builder.addTest(unittest.makeSuite(TestGetFullStore))
     suite_builder.addTest(unittest.makeSuite(TestCustomStoreAndOptionKeys))
+    suite_builder.addTest(unittest.makeSuite(TestTimeBasedConfigStore))
 
     return suite_builder
 

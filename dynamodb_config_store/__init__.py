@@ -31,15 +31,16 @@ prod        | secret-key     |                |                | test1234
 *) Hash key
 **) Range key
 """
-import time
 import os.path
+import time
 from ConfigParser import SafeConfigParser
 
+from boto.dynamodb2.exceptions import ItemNotFound
 from boto.dynamodb2.fields import HashKey, RangeKey
 from boto.dynamodb2.table import Table
-from boto.dynamodb2.exceptions import ItemNotFound
 from boto.exception import JSONResponseError
 
+from dynamodb_config_store.config_stores.time_based import TimeBasedConfigStore
 from dynamodb_config_store.exceptions import (
     MisconfiguredSchemaException,
     TableNotCreatedException,
@@ -55,19 +56,23 @@ __version__ = config_file.get('general', 'version')
 class DynamoDBConfigStore(object):
     """ DynamoDB Config Store instance """
 
-    connection = None   # boto.dynamodb2.layer1.DynamoDBConnection instance
-    table_name = None   # Name of the DynamoDB table
-    store_name = None   # Name of the Store
-    store_key = None    # Key for the store (default: _store)
-    option_key = None   # Key for the option (default: _option)
-    table = None        # boto.dynamodb2.table.Table instance
-    read_units = None   # Number of read units to provision to new tables
-    write_units = None  # Number of write units to provision to new tables
+    auto_update = None      # Turn on or off the auto updater
+    config = None           # Instance of the a ConfigStore
+    connection = None       # boto.dynamodb2.layer1.DynamoDBConnection instance
+    option_key = None       # Key for the option (default: _option)
+    read_units = None       # Number of read units to provision to new tables
+    store_key = None        # Key for the store (default: _store)
+    store_name = None       # Name of the Store
+    table = None            # boto.dynamodb2.table.Table instance
+    table_name = None       # Name of the DynamoDB table
+    update_interval = None  # Update interval for the auto updater
+    write_units = None      # Number of write units to provision to new tables
 
     def __init__(
             self, connection, table_name, store_name,
             store_key='_store', option_key='_option',
-            read_units=1, write_units=1):
+            read_units=1, write_units=1,
+            auto_update=True, update_interval=300):
         """ Constructor for the config store
 
         :type connection: boto.dynamodb2.layer1.DynamoDBConnection
@@ -75,19 +80,26 @@ class DynamoDBConfigStore(object):
         :type table_name: str
         :param table_name: Name of the DynamoDB table to use
         :type store_name: str
-        :type store_name: Name of the DynamoDB Config Store
+        :param store_name: Name of the DynamoDB Config Store
         :type store_key: str
-        :type store_key: Key name for the store name in DynamoDB. Default _store
+        :param store_key: Key name for the store in DynamoDB. Default _store
         :type option_key: str
-        :type option_key: Key name for the option in DynamoDB. Default _option
+        :param option_key: Key name for the option in DynamoDB. Default _option
+        :type auto_update: bool
+        :param auto_update:
+            Auto update the config option every update_interval seconds
+        :type update_interval: int
+        :param update_interval: How often, in seconds, to refresh the config
         :returns: None
         """
+        self.auto_update = auto_update
         self.connection = connection
-        self.table_name = table_name
-        self.store_name = store_name
-        self.store_key = store_key
         self.option_key = option_key
         self.read_units = read_units
+        self.store_key = store_key
+        self.store_name = store_name
+        self.table_name = table_name
+        self.update_interval = update_interval
         self.write_units = write_units
 
         self._initialize()
@@ -211,6 +223,14 @@ class DynamoDBConfigStore(object):
                     raise TableNotCreatedException
 
         self.table = Table(self.table_name, connection=self.connection)
+
+        if self.auto_update:
+            self.config = TimeBasedConfigStore(
+                self.table,
+                self.store_name,
+                self.store_key,
+                self.option_key,
+                update_interval=self.update_interval)
 
     def _create_table(self, read_units=1, write_units=1):
         """ Create a new table
