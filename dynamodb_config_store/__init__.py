@@ -35,11 +35,11 @@ import os.path
 import time
 from ConfigParser import SafeConfigParser
 
-from boto.dynamodb2.exceptions import ItemNotFound
 from boto.dynamodb2.fields import HashKey, RangeKey
 from boto.dynamodb2.table import Table
 from boto.exception import JSONResponseError
 
+from dynamodb_config_store.config_stores.direct import DirectConfigStore
 from dynamodb_config_store.config_stores.time_based import TimeBasedConfigStore
 from dynamodb_config_store.exceptions import (
     MisconfiguredSchemaException,
@@ -56,23 +56,25 @@ __version__ = config_file.get('general', 'version')
 class DynamoDBConfigStore(object):
     """ DynamoDB Config Store instance """
 
-    auto_update = None      # Turn on or off the auto updater
     config = None           # Instance of the a ConfigStore
     connection = None       # boto.dynamodb2.layer1.DynamoDBConnection instance
     option_key = None       # Key for the option (default: _option)
     read_units = None       # Number of read units to provision to new tables
     store_key = None        # Key for the store (default: _store)
     store_name = None       # Name of the Store
+    store_type = None       # Store type to use
+    store_type_args = None  # Store type arguments
+    store_type_kwargs = None  # Store type key word args
     table = None            # boto.dynamodb2.table.Table instance
     table_name = None       # Name of the DynamoDB table
-    update_interval = None  # Update interval for the auto updater
     write_units = None      # Number of write units to provision to new tables
 
     def __init__(
             self, connection, table_name, store_name,
             store_key='_store', option_key='_option',
             read_units=1, write_units=1,
-            auto_update=True, update_interval=300):
+            store_type='DirectConfigStore',
+            store_type_args=[], store_type_kwargs={}):
         """ Constructor for the config store
 
         :type connection: boto.dynamodb2.layer1.DynamoDBConnection
@@ -85,27 +87,49 @@ class DynamoDBConfigStore(object):
         :param store_key: Key name for the store in DynamoDB. Default _store
         :type option_key: str
         :param option_key: Key name for the option in DynamoDB. Default _option
-        :type auto_update: bool
-        :param auto_update:
-            Auto update the config option every update_interval seconds
-        :type update_interval: int
-        :param update_interval: How often, in seconds, to refresh the config
+        :type store_type: str
+        :param store_type: Store type to use
+        :type store_type_args: list
+        :param store_type_args: Store type arguments
+        :type store_type_kwargs: dict
+        :param store_type_kwargs: Store type key word arguments
         :returns: None
         """
-        self.auto_update = auto_update
         self.connection = connection
         self.option_key = option_key
         self.read_units = read_units
         self.store_key = store_key
         self.store_name = store_name
         self.table_name = table_name
-        self.update_interval = update_interval
         self.write_units = write_units
+        self.store_type = store_type
+        self.store_type_args = store_type_args
+        self.store_type_kwargs = store_type_kwargs
 
-        self._initialize()
+        self._initialize_table()
+        self._initialize_store()
 
-    def _initialize(self):
-        """ Initialize the store
+    def _initialize_store(self):
+        """ Initialize the store to use """
+        if self.store_type == 'TimeBasedConfigStore':
+            self.config = TimeBasedConfigStore(
+                self.table,
+                self.store_name,
+                self.store_key,
+                self.option_key,
+                *self.store_type_args,
+                **self.store_type_kwargs)
+        elif self.store_type == 'DirectConfigStore':
+            self.config = DirectConfigStore(
+                self.table,
+                self.store_name,
+                self.store_key,
+                self.option_key,
+                *self.store_type_args,
+                **self.store_type_kwargs)
+
+    def _initialize_table(self):
+        """ Initialize the table
 
         :returns: None
         """
@@ -143,8 +167,6 @@ class DynamoDBConfigStore(object):
                     raise TableNotCreatedException
 
         self.table = Table(self.table_name, connection=self.connection)
-
-        self.reload()
 
     def _create_table(self, read_units=1, write_units=1):
         """ Create a new table
@@ -191,96 +213,12 @@ class DynamoDBConfigStore(object):
 
         return False
 
-    def get(self, option=None, keys=None):
-        """ Get a config item
-
-        A query towards DynamoDB will always be executed when this
-        method is called.
-
-        An boto.dynamodb2.exceptions.ItemNotFound will be thrown if the config
-        option does not exist.
-
-        :type option: str
-        :param option: Name of the configuration option, all options if None
-        :type keys: list
-        :param keys: List of keys to return (used to get subsets of keys)
-        :returns: dict -- Dictionary with all data; {'key': 'value'}
-        """
-        if option:
-            return self.get_option(option, keys=keys)
-
-        else:
-            try:
-                items = {}
-                query = {'{}__eq'.format(self.store_key): self.store_name}
-
-                for item in self.table.query_2(**query):
-                    option = item[self.option_key]
-
-                    # Remove metadata
-                    del item[self.store_key]
-                    del item[self.option_key]
-
-                    items[option] = {k: v for k, v in item.items()}
-
-                return items
-
-            except ItemNotFound:
-                raise
-
-    def get_option(self, option, keys=None):
-        """ Get a specific option from the store.
-
-        A query towards DynamoDB will always be executed when this
-        method is called.
-
-        get_option('a') == get(option='a')
-        get_option('a', keys=['b', 'c']) == get(option='a', keys=['b', 'c'])
-
-        :type option: str
-        :param option: Name of the configuration option
-        :type keys: list
-        :param keys: List of keys to return (used to get subsets of keys)
-        :returns: dict -- Dictionary with all data; {'key': 'value'}
-        """
-        try:
-            kwargs = {
-                self.store_key: self.store_name,
-                self.option_key: option
-            }
-
-            item = self.table.get_item(**kwargs)
-
-            del item[self.store_key]
-            del item[self.option_key]
-
-            if keys:
-                return {
-                    key: value
-                    for key, value in item.items()
-                    if key in keys
-                }
-            else:
-                return {key: value for key, value in item.items()}
-
-        except ItemNotFound:
-            raise
-
     def reload(self):
-        """ Reload the config object
-
-        This issues an query towards DynamoDB in order to fetch the latest data
-        from the store.
+        """ Reload the config store
 
         :returns: None
         """
-        if self.auto_update:
-            self.config = TimeBasedConfigStore(
-                self.table,
-                self.store_name,
-                self.store_key,
-                self.option_key,
-                update_interval=self.update_interval)
+        self._initialize_store()
 
     def set(self, option, data):
         """ Upsert a config item

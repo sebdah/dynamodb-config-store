@@ -17,7 +17,6 @@ class TimeBasedConfigStore(ConfigStore):
     the configuration options from DynamoDB will be set as instance attributes.
     """
 
-    _attributes = []        # List of set instance attributes
     _option_key = None      # Option key in DynamoDB
     _populated = False      # True when the first population has been done
     _store_key = None       # Store key in DynamoDB

@@ -157,7 +157,7 @@ class TestGetOption(unittest.TestCase):
         self.store.set('api', obj)
 
         # Retrieve the object
-        option = self.store.get('api')
+        option = self.store.config.get('api')
 
         self.assertNotIn('_store', option)
         self.assertNotIn('_option', option)
@@ -169,7 +169,7 @@ class TestGetOption(unittest.TestCase):
     def test_get_item_not_found(self):
         """ Test that we can't retrieve non-existing items """
         with self.assertRaises(ItemNotFound):
-            self.store.get('doesnotexist')
+            self.store.config.get('doesnotexist')
 
     def tearDown(self):
         """ Tear down the test case """
@@ -206,7 +206,7 @@ class TestGetOptionAndKeysSubset(unittest.TestCase):
         self.store.set('api', obj)
 
         # Retrieve the object
-        option = self.store.get('api', keys=['endpoint', 'port'])
+        option = self.store.config.get('api', keys=['endpoint', 'port'])
 
         self.assertNotIn('_store', option)
         self.assertNotIn('_option', option)
@@ -255,7 +255,7 @@ class TestGetFullStore(unittest.TestCase):
         self.store.set('user', objUser)
 
         # Retrieve all objects
-        options = self.store.get()
+        options = self.store.config.get()
         self.assertEquals(len(options), 2)
         optApi = options['api']
         optUser = options['user']
@@ -364,7 +364,7 @@ class TestSet(unittest.TestCase):
         self.store.set('user', obj)
 
         # Get the option
-        option = self.store.get('user')
+        option = self.store.config.get('user')
         self.assertEqual(option['username'], obj['username'])
         self.assertEqual(option['password'], obj['password'])
 
@@ -378,7 +378,7 @@ class TestSet(unittest.TestCase):
         self.store.set('user', updatedObj)
 
         # Get the option
-        option = self.store.get('user')
+        option = self.store.config.get('user')
         self.assertEqual(option['username'], updatedObj['username'])
         self.assertEqual(option['password'], updatedObj['password'])
 
@@ -393,7 +393,7 @@ class TestSet(unittest.TestCase):
         self.store.set('credentials', obj)
 
         # Get the option
-        option = self.store.get('credentials')
+        option = self.store.config.get('credentials')
         self.assertEqual(option['username'], obj['username'])
         self.assertEqual(option['password'], obj['password'])
 
@@ -407,7 +407,7 @@ class TestSet(unittest.TestCase):
         self.store.set('credentials', updatedObj)
 
         # Get the option
-        option = self.store.get('credentials')
+        option = self.store.config.get('credentials')
         self.assertEqual(option['access_key'], updatedObj['access_key'])
         self.assertEqual(option['secret_key'], updatedObj['secret_key'])
         self.assertNotIn('username', option)
@@ -431,7 +431,8 @@ class TestTimeBasedConfigStore(unittest.TestCase):
             connection,
             self.table_name,
             self.store_name,
-            update_interval=5)
+            store_type='TimeBasedConfigStore',
+            store_type_kwargs={'update_interval': 5})
 
         # Get an Table instance for validation
         self.table = Table(self.table_name, connection=connection)

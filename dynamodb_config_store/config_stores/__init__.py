@@ -4,6 +4,8 @@
 class ConfigStore(object):
     """ Base class for config stores """
 
+    _attributes = []        # List of set instance attributes
+
     def _delete_instance_attributes(self):
         """ Delete all the instance attributes
 
