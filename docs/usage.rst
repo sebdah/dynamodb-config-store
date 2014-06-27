@@ -7,12 +7,16 @@ Instanciate a Store
 A store can be instanciated like this:
 ::
 
+    from dynamodb_config_store
+
     store = DynamoDBConfigStore(
         connection,                 # boto.dynamodb2.layer1.DynamoDBConnection
         table_name,                 # Table name to use
-        store_name,                 # Store name to use
+        store_name)                 # Store name to use
         store_key='_store',         # (Optional) value to store Store name in
-        option_key='_option')       # (Optional) value to store Option name in
+        option_key='_option',       # (Optional) value to store Option name in
+        auto_update=True            # (Optional) Turn on or off auto updating
+        update_interval=300)        # (Optional) Update interval in seconds
 
 When the Store is instanciated it will create the table if it does not exist. Currently a table with 1 read unit and 1 write unit will be created.
 
@@ -63,6 +67,31 @@ You can manually force a configuration update by issuing:
 ::
 
     store.reload()
+
+Set update interval
+"""""""""""""""""""
+
+You can set the update interval when instanciating DynamoDB Config Store:
+::
+
+    store = DynamoDBConfigStore(
+        connection,                 # boto.dynamodb2.layer1.DynamoDBConnection
+        table_name,                 # Table name to use
+        store_name,                 # Store name to use
+        auto_update=True            # (Optional) Turn on or off auto updating
+        update_interval=300)        # (Optional) Update interval in seconds
+
+Disable auto reloading
+""""""""""""""""""""""
+
+If you don't want to use this functionality and rather want to read the options directly from DynamoDB, you can disable the auto reloading using:
+::
+
+    store = DynamoDBConfigStore(
+        connection,                 # boto.dynamodb2.layer1.DynamoDBConnection
+        table_name,                 # Table name to use
+        store_name,                 # Store name to use
+        auto_update=False)          # (Optional) Turn on or off auto updating
 
 Reading configuration directly from DynamoDB
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
