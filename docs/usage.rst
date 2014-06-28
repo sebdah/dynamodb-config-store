@@ -116,7 +116,7 @@ The ``SimpleConfigStore`` is enabled by default, but you can explicitly load it 
         connection,
         table_name,
         store_name,
-        store_type='SimpleConfigStore')
+        config_store='SimpleConfigStore')
 
 TimeBasedConfigStore
 ~~~~~~~~~~~~~~~~~~~~
@@ -147,7 +147,7 @@ You can start using the ``TimeBasedConfigStore`` by calling ``DynamoDBConfigStor
         connection,
         table_name,
         store_name,
-        store_type='TimeBasedConfigStore')
+        config_store='TimeBasedConfigStore')
 
 
 Read an Option
@@ -180,8 +180,8 @@ You can set the update interval when instanciating DynamoDB Config Store:
         connection,
         table_name,
         store_name,
-        store_type='TimeBasedConfigStore',
-        store_type_kwargs={'auto_reload': 60})
+        config_store='TimeBasedConfigStore',
+        config_store_kwargs={'auto_reload': 60})
 
 This will set the update interval to 60 seconds.
 
