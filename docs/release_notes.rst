@@ -1,6 +1,12 @@
 Release notes
 =============
 
+0.2.1 (2014-06-28)
+------------------
+
+* Throw exception if not implemented config store is used (`#16 <https://github.com/sebdah/dynamodb-config-store/issues/16>`_)
+* Renamed ``store_type`` parameter to ``config_store``
+
 0.2.0 (2014-06-27)
 ------------------
 
