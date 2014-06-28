@@ -127,6 +127,8 @@ class DynamoDBConfigStore(object):
                 self.option_key,
                 *self.store_type_args,
                 **self.store_type_kwargs)
+        else:
+            raise NotImplementedError
 
     def _initialize_table(self):
         """ Initialize the table

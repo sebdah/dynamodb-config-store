@@ -476,6 +476,30 @@ class TestTimeBasedConfigStore(unittest.TestCase):
         self.table.delete()
 
 
+class TestNotImplementedConfigStore(unittest.TestCase):
+
+    def test_not_implemented_config_store(self):
+
+        # Configuration options
+        self.table_name = 'conf'
+        self.store_name = 'test'
+
+        with self.assertRaises(NotImplementedError):
+            # Instanciate the store
+            self.store = DynamoDBConfigStore(
+                connection,
+                self.table_name,
+                self.store_name,
+                store_type='NotExistingConfigStore')
+
+        # Get an Table instance for validation
+        self.table = Table(self.table_name, connection=connection)
+
+    def tearDown(self):
+        """ Tear down the test case """
+        self.table.delete()
+
+
 def suite():
     """ Defines the test suite """
     suite_builder = unittest.TestSuite()
@@ -488,6 +512,7 @@ def suite():
     suite_builder.addTest(unittest.makeSuite(TestGetFullStore))
     suite_builder.addTest(unittest.makeSuite(TestCustomStoreAndOptionKeys))
     suite_builder.addTest(unittest.makeSuite(TestTimeBasedConfigStore))
+    suite_builder.addTest(unittest.makeSuite(TestNotImplementedConfigStore))
 
     return suite_builder
 
