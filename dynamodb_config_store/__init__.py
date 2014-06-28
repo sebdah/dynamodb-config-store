@@ -62,9 +62,9 @@ class DynamoDBConfigStore(object):
     read_units = None       # Number of read units to provision to new tables
     store_key = None        # Key for the store (default: _store)
     store_name = None       # Name of the Store
-    store_type = None       # Store type to use
-    store_type_args = None  # Store type arguments
-    store_type_kwargs = None  # Store type key word args
+    config_store = None       # Store type to use
+    config_store_args = None  # Store type arguments
+    config_store_kwargs = None  # Store type key word args
     table = None            # boto.dynamodb2.table.Table instance
     table_name = None       # Name of the DynamoDB table
     write_units = None      # Number of write units to provision to new tables
@@ -73,8 +73,8 @@ class DynamoDBConfigStore(object):
             self, connection, table_name, store_name,
             store_key='_store', option_key='_option',
             read_units=1, write_units=1,
-            store_type='SimpleConfigStore',
-            store_type_args=[], store_type_kwargs={}):
+            config_store='SimpleConfigStore',
+            config_store_args=[], config_store_kwargs={}):
         """ Constructor for the config store
 
         :type connection: boto.dynamodb2.layer1.DynamoDBConnection
@@ -87,12 +87,12 @@ class DynamoDBConfigStore(object):
         :param store_key: Key name for the store in DynamoDB. Default _store
         :type option_key: str
         :param option_key: Key name for the option in DynamoDB. Default _option
-        :type store_type: str
-        :param store_type: Store type to use
-        :type store_type_args: list
-        :param store_type_args: Store type arguments
-        :type store_type_kwargs: dict
-        :param store_type_kwargs: Store type key word arguments
+        :type config_store: str
+        :param config_store: Store type to use
+        :type config_store_args: list
+        :param config_store_args: Store type arguments
+        :type config_store_kwargs: dict
+        :param config_store_kwargs: Store type key word arguments
         :returns: None
         """
         self.connection = connection
@@ -102,31 +102,33 @@ class DynamoDBConfigStore(object):
         self.store_name = store_name
         self.table_name = table_name
         self.write_units = write_units
-        self.store_type = store_type
-        self.store_type_args = store_type_args
-        self.store_type_kwargs = store_type_kwargs
+        self.config_store = config_store
+        self.config_store_args = config_store_args
+        self.config_store_kwargs = config_store_kwargs
 
         self._initialize_table()
         self._initialize_store()
 
     def _initialize_store(self):
         """ Initialize the store to use """
-        if self.store_type == 'TimeBasedConfigStore':
+        if self.config_store == 'TimeBasedConfigStore':
             self.config = TimeBasedConfigStore(
                 self.table,
                 self.store_name,
                 self.store_key,
                 self.option_key,
-                *self.store_type_args,
-                **self.store_type_kwargs)
-        elif self.store_type == 'SimpleConfigStore':
+                *self.config_store_args,
+                **self.config_store_kwargs)
+        elif self.config_store == 'SimpleConfigStore':
             self.config = SimpleConfigStore(
                 self.table,
                 self.store_name,
                 self.store_key,
                 self.option_key,
-                *self.store_type_args,
-                **self.store_type_kwargs)
+                *self.config_store_args,
+                **self.config_store_kwargs)
+        else:
+            raise NotImplementedError
 
     def _initialize_table(self):
         """ Initialize the table
