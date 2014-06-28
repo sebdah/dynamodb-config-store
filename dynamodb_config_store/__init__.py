@@ -35,6 +35,12 @@ import os.path
 import time
 from ConfigParser import SafeConfigParser
 
+from boto.dynamodb2.exceptions import (
+    LimitExceededException,
+    ProvisionedThroughputExceededException,
+    ResourceInUseException,
+    ResourceNotFoundException,
+    ValidationException)
 from boto.dynamodb2.fields import HashKey, RangeKey
 from boto.dynamodb2.table import Table
 from boto.exception import JSONResponseError
@@ -236,4 +242,17 @@ class DynamoDBConfigStore(object):
         data[self.store_key] = self.store_name
         data[self.option_key] = option
 
-        return self.table.put_item(data, overwrite=True)
+        try:
+            return self.table.put_item(data, overwrite=True)
+        except LimitExceededException:
+            raise
+        except ProvisionedThroughputExceededException:
+            raise
+        except ResourceInUseException:
+            raise
+        except ResourceNotFoundException:
+            raise
+        except ValidationException:
+            raise
+        except Exception:
+            raise

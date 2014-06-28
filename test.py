@@ -1,9 +1,10 @@
 """ Unit tests for DynamoDB Config Store """
 import time
 import unittest
+from random import random
 
 from boto.dynamodb2.layer1 import DynamoDBConnection
-from boto.dynamodb2.exceptions import ItemNotFound
+from boto.dynamodb2.exceptions import ItemNotFound, ValidationException
 from boto.dynamodb2.table import Table
 
 from dynamodb_config_store import DynamoDBConfigStore
@@ -412,6 +413,13 @@ class TestSet(unittest.TestCase):
         self.assertEqual(option['secret_key'], updatedObj['secret_key'])
         self.assertNotIn('username', option)
         self.assertNotIn('password', option)
+
+    def test_instert_too_large_object(self):
+        """ Test of inserting an object larger than 64 kb """
+        with self.assertRaises(ValidationException):
+            self.store.set(
+                'large',
+                {x: int(random()*100000000000000) for x in xrange(1, 9999)})
 
     def tearDown(self):
         """ Tear down the test case """
