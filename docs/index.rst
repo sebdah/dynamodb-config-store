@@ -43,6 +43,6 @@ You can then retrieve configuration like this:
         'prod')                     # Store name
 
     # Get the 'db' option and all it's values
-    store.get('db') # Returns {'host': 'db-cluster.com', 'port', Decimal(27017)}
+    store.config.get('db') # Returns {'host': 'db-cluster.com', 'port', Decimal(27017)}
 
 In our lingo a **Store** is roughly equivivalent to a configuration file. And an **Option** is an key in the Store which holds zero or more **Keys**.
