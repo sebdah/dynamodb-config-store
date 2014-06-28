@@ -1,6 +1,11 @@
 Release notes
 =============
 
+0.2.2 (2014-06-28)
+------------------
+
+* Address common DynamoDB exceptions (`#17 <https://github.com/sebdah/dynamodb-config-store/issues/17>`_)
+
 0.2.1 (2014-06-28)
 ------------------
 
