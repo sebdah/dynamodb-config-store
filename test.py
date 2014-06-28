@@ -431,8 +431,8 @@ class TestTimeBasedConfigStore(unittest.TestCase):
             connection,
             self.table_name,
             self.store_name,
-            store_type='TimeBasedConfigStore',
-            store_type_kwargs={'update_interval': 5})
+            config_store='TimeBasedConfigStore',
+            config_store_kwargs={'update_interval': 5})
 
         # Get an Table instance for validation
         self.table = Table(self.table_name, connection=connection)
@@ -490,7 +490,7 @@ class TestNotImplementedConfigStore(unittest.TestCase):
                 connection,
                 self.table_name,
                 self.store_name,
-                store_type='NotExistingConfigStore')
+                config_store='NotExistingConfigStore')
 
         # Get an Table instance for validation
         self.table = Table(self.table_name, connection=connection)
