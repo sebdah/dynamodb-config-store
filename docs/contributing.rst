@@ -12,7 +12,7 @@ Running tests
 Requirements
 ~~~~~~~~~~~~
 
-You must have [DynamoDB Local](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Tools.DynamoDBLocal.html) installed. It is a local version of DynamoDB that can be used for local development and test execution.
+You must have `DynamoDB Local <http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Tools.DynamoDBLocal.html>`_ installed. It is a local version of DynamoDB that can be used for local development and test execution.
 
 The test suite assumes that DynamoDB Local will be running at port ``8000``.
 

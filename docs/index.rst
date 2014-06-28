@@ -20,7 +20,7 @@ Overview
 
 Store your configuration in DynamoDB using DynamoDB Config Store.
 
-Using this Python class you'll be able to easily manage application configuration directly in DynamoDB. It works almost like any configuration file, except that an option can have multiple values (it's NoSQL, right :)). For example your configuration could look like this:
+Using this Python class you'll be able to easily manage application configuration directly in DynamoDB. It works almost like any configuration file, except that an option can have multiple values. For example your configuration could look like this:
 ::
 
     ------------+----------------+----------------+----------------+----------------
