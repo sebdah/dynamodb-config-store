@@ -1,7 +1,12 @@
 """ Setup script for PyPI """
 import os
 from setuptools import setup
-from ConfigParser import SafeConfigParser
+
+import sys
+if sys.version_info.major > 2:
+    from configparser import ConfigParser as SafeConfigParser
+else:
+    from ConfigParser import SafeConfigParser
 
 settings = SafeConfigParser()
 settings.read(os.path.realpath('dynamodb_config_store/settings.conf'))
