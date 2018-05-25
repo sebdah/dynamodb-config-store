@@ -33,7 +33,6 @@ prod        | secret-key     |                |                | test1234
 """
 import os.path
 import time
-
 import sys
 if sys.version_info.major > 2:
     from configparser import ConfigParser as SafeConfigParser

@@ -1,7 +1,6 @@
 """ Setup script for PyPI """
 import os
 from setuptools import setup
-
 import sys
 if sys.version_info.major > 2:
     from configparser import ConfigParser as SafeConfigParser
