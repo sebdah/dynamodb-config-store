@@ -1,6 +1,11 @@
 Release notes
 =============
 
+0.3.0 (2018-05-25)
+------------------
+
+* Add Python 3 support (`#23 <https://github.com/sebdah/dynamodb-config-store/issues/23>`_)
+
 0.2.2 (2014-06-28)
 ------------------
 
